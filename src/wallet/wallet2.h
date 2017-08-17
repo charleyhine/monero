@@ -539,6 +539,8 @@ namespace tools
     uint64_t get_min_output_value() const { return m_min_output_value; }
     void merge_destinations(bool merge) { m_merge_destinations = merge; }
     bool merge_destinations() const { return m_merge_destinations; }
+    void transfer_unlocked(bool transfer_unlocked) { m_transfer_unlocked = transfer_unlocked; }
+    bool transfer_unlocked() const { return m_transfer_unlocked; }
 
     bool get_tx_key(const crypto::hash &txid, crypto::secret_key &tx_key) const;
 
@@ -701,6 +703,7 @@ namespace tools
     uint64_t m_min_output_value;
     bool m_merge_destinations;
     bool m_is_initialized;
+    bool m_transfer_unlocked;
     NodeRPCProxy m_node_rpc_proxy;
     std::unordered_set<crypto::hash> m_scanned_pool_txs[2];
   };

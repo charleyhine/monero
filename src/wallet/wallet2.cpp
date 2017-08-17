@@ -2037,6 +2037,7 @@ bool wallet2::load_keys(const std::string& keys_file_name, const std::string& pa
     m_min_output_count = 0;
     m_min_output_value = 0;
     m_merge_destinations = false;
+    m_transfer_unlocked = false;
   }
   else
   {
@@ -4390,7 +4391,7 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions_2(std::vector<cryp
   for (size_t i = 0; i < m_transfers.size(); ++i)
   {
     const transfer_details& td = m_transfers[i];
-    if (!td.m_spent && (use_rct ? true : !td.is_rct()) && is_transfer_unlocked(td))
+    if (!td.m_spent && (use_rct ? true : !td.is_rct()) && (transfer_unlocked() || is_transfer_unlocked(td)))
     {
       if ((td.is_rct()) || is_valid_decomposed_amount(td.amount()))
         unused_transfers_indices.push_back(i);
@@ -4403,7 +4404,9 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions_2(std::vector<cryp
   // early out if we know we can't make it anyway
   // we could also check for being within FEE_PER_KB, but if the fee calculation
   // ever changes, this might be missed, so let this go through
-  THROW_WALLET_EXCEPTION_IF(needed_money > unlocked_balance(), error::not_enough_money,
+  uint64_t found_money = transfer_unlocked() ? balance() : unlocked_balance();
+
+  THROW_WALLET_EXCEPTION_IF(needed_money > found_money, error::not_enough_money,
       unlocked_balance(), needed_money, 0);
 
   if (unused_dust_indices.empty() && unused_transfers_indices.empty())
